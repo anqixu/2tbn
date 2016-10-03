@@ -7,10 +7,9 @@ restoredefaultpath;
 
 rng(1729);
 
-%% Define settings and create data
+%% Generate simulated observed data
 
-num_em_steps = 5; % Set to 0 to only run filtering+smoothing+MAP
-
+num_time_steps = 201;
 init_pos = 0.3;
 %prop_behavior = 'stationary';
 %prop_behavior = 'brownian';
@@ -20,15 +19,26 @@ prop_step_size = 0.01;
 prop_bias = 0.0;
 prop_stdev = 0.01;
 observe_pose_stdev = 0.1;
-observe_pose_freq = 6;
+observe_pose_freq = 20;
 observe_dir_od = 0.02;
 observe_dir_kd = 150;
 observe_dir_bd = 0.1;
-observe_dir_freq = 6;
+observe_dir_freq = 5;
 sweep_tight_lower_cap = 0.2;
 
+dataset = genRobotPathData(num_time_steps, init_pos, ...
+  prop_behavior, prop_step_size, ...
+  prop_bias, prop_stdev, observe_pose_stdev, observe_pose_freq, ...
+  observe_dir_od, observe_dir_kd, observe_dir_bd, observe_dir_freq, ...
+  sweep_tight_lower_cap);
+ds = dataset.data_all;
+
+%% Initialize engine
+
+% Set to 0 to only run filtering+smoothing+MAP
+num_em_steps = 5;
+
 num_bins = 300;
-num_time_steps = 201;
 hard_em_type = 'smooth';
 em_params_eps_gain = 1;
 params.wx_bias = 0.1;
@@ -38,16 +48,6 @@ params.od = 0.5;
 params.kd = 25;
 params.bd = 0.2;
 params.sz = 0.1;
-
-dataset = genRobotPathData(num_time_steps, init_pos, ...
-  prop_behavior, prop_step_size, ...
-  prop_bias, prop_stdev, observe_pose_stdev, observe_pose_freq, ...
-  observe_dir_od, observe_dir_kd, observe_dir_bd, observe_dir_freq, ...
-  sweep_tight_lower_cap);
-
-ds = dataset.data_all;
-
-%% Initialize engine
 
 model = RobotModel(params);
 model_dup = RobotModel(params);
